@@ -1,5 +1,7 @@
 export { ROUTES } from './constants/Routes.constants'
+export { NAV_ITEMS } from './constants/Nav.constants'
 export { ErrorBoundary } from './errors/ErrorBoundary'
 export { PlaceholderPage } from './ui/components/PlaceholderPage'
 export type { PlaceholderPageProps } from './ui/components/PlaceholderPage'
 export { NotFoundPage } from './ui/pages/NotFoundPage'
+export { ShellLayout } from './ui/layouts/ShellLayout'
