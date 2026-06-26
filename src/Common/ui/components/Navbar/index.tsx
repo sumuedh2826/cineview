@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState, type KeyboardEvent } from 'react'
+import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { authStore } from '@/Auth'
 import { NAV_ITEMS, ROUTES } from '@/Common'
 
@@ -9,10 +10,53 @@ function getInitials(username: string): string {
 
 export const Navbar = observer(function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isSearchPage = location.pathname === ROUTES.SEARCH
+
+  const [localQuery, setLocalQuery] = useState('')
+
+  useEffect(() => {
+    if (!isSearchPage) {
+      setLocalQuery('')
+    }
+  }, [isSearchPage])
+
+  const searchValue = isSearchPage ? (searchParams.get('q') ?? '') : localQuery
+
+  function handleSearchChange(value: string) {
+    if (isSearchPage) {
+      if (value) {
+        setSearchParams({ q: value }, { replace: true })
+      } else {
+        setSearchParams({}, { replace: true })
+      }
+      return
+    }
+
+    setLocalQuery(value)
+  }
 
   function handleLogout() {
     authStore.logout()
     navigate(ROUTES.LOGIN, { replace: true })
+  }
+
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== 'Enter') {
+      return
+    }
+
+    const trimmed = searchValue.trim()
+    if (!trimmed) {
+      return
+    }
+
+    if (isSearchPage) {
+      return
+    }
+
+    navigate(`${ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}`)
   }
 
   return (
@@ -48,7 +92,9 @@ export const Navbar = observer(function Navbar() {
         <div className="ml-auto flex items-center gap-4">
           <input
             type="search"
-            readOnly
+            value={searchValue}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Search movies, shows..."
             aria-label="Search movies and shows"
             className="hidden w-56 rounded-full border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-300 placeholder:text-gray-500 md:block"

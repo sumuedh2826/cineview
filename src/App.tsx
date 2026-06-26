@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { BrowserRouter } from 'react-router-dom'
 import { authStore } from '@/Auth'
 import { AppRoutes } from './router'
 
@@ -8,11 +7,7 @@ function App() {
     authStore.restoreSession()
   }, [])
 
-  return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  )
+  return <AppRoutes />
 }
 
 export default App

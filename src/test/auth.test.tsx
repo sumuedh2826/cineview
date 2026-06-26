@@ -24,7 +24,7 @@ describe('Milestone 2 authentication', () => {
     await user.click(screen.getByRole('button', { name: 'Sign In' }))
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Home' })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
     })
 
     expect(localStorage.getItem(AUTH_STORAGE_KEY)).toContain('admin')
@@ -84,7 +84,7 @@ describe('Milestone 2 authentication', () => {
     })
 
     expect(
-      await screen.findByRole('heading', { name: 'Home' }),
+      await screen.findByRole('link', { name: 'Home' }),
     ).toBeInTheDocument()
   })
 
