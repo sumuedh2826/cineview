@@ -1,1 +1,1 @@
-export { WatchlistStore, watchlistStore } from './WatchlistStore'
+export { CollectionStore, collectionStore } from './CollectionStore'

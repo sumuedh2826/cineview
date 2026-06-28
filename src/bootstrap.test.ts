@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { authStore } from '@/Auth'
-import { watchlistStore } from '@/Collection'
+import { collectionStore } from '@/Collection'
 import { preferencesStore } from '@/Preferences'
 import { bootstrapApplication } from './bootstrap'
 
@@ -9,13 +9,13 @@ describe('bootstrapApplication', () => {
     localStorage.clear()
     authStore.resetForTests()
     preferencesStore.resetForTests()
-    watchlistStore.resetForTests()
+    collectionStore.resetForTests()
   })
 
-  it('initializes preferences, auth, and watchlist', () => {
+  it('initializes preferences, auth, and collection', () => {
     bootstrapApplication()
     expect(preferencesStore.isInitialized).toBe(true)
     expect(authStore.isHydrating).toBe(false)
-    expect(watchlistStore.isInitialized).toBe(true)
+    expect(collectionStore.isInitialized).toBe(true)
   })
 })

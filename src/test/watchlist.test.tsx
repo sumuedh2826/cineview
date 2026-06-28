@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { bootstrapApplication } from '@/bootstrap'
 import { authStore } from '@/Auth'
 import { AUTH_STORAGE_KEY } from '@/Auth/core/constants/Auth.constants'
-import { watchlistStore } from '@/Collection'
+import { collectionStore } from '@/Collection'
 import { WatchlistPage } from '@/Collection/ui/pages/WatchlistPage'
 import { preferencesStore } from '@/Preferences'
 
@@ -14,7 +14,7 @@ describe('WatchlistPage', () => {
     localStorage.clear()
     authStore.resetForTests()
     preferencesStore.resetForTests()
-    watchlistStore.resetForTests()
+    collectionStore.resetForTests()
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ username: 'admin' }))
     bootstrapApplication()
   })
@@ -29,8 +29,8 @@ describe('WatchlistPage', () => {
     expect(screen.getByText('Your watchlist is empty')).toBeInTheDocument()
   })
 
-  it('renders saved watchlist items', async () => {
-    watchlistStore.add({
+  it('renders saved watchlist items', () => {
+    collectionStore.add({
       mediaId: 10,
       mediaType: 'movie',
       title: 'Saved Movie',
@@ -51,7 +51,7 @@ describe('WatchlistPage', () => {
   it('filters by status tab', async () => {
     const user = userEvent.setup()
 
-    watchlistStore.add({
+    collectionStore.add({
       mediaId: 11,
       mediaType: 'movie',
       title: 'Want Movie',

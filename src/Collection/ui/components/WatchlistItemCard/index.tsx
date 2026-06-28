@@ -3,12 +3,18 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/Common'
 import { getPosterUrl } from '@/Common/core/utils/tmdbImage'
-import { watchlistStore } from '@/Collection'
+import { collectionStore } from '@/Collection'
 import {
   WATCHLIST_NOTE_MAX_LENGTH,
+  WATCHLIST_NOTE_WARNING_AT,
   WATCHLIST_STATUS_LABELS,
-} from '@/Collection/core/constants/watchlist.constants'
-import type { WatchlistEntry, WatchlistStatus } from '@/Collection/core/types/watchlist.schemas'
+} from '@/Collection/core/constants/collection.constants'
+import {
+  WatchlistNoteInputSchema,
+  type WatchlistEntry,
+  type WatchlistStatus,
+} from '@/Collection/core/types/collection.schemas'
+import { TvWatchlistProgress } from '../TvWatchlistProgress'
 
 const STATUS_OPTIONS: WatchlistStatus[] = ['want_to_watch', 'watching', 'completed']
 
@@ -21,6 +27,7 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
 }: WatchlistItemCardProps) {
   const [noteExpanded, setNoteExpanded] = useState(false)
   const [draftNote, setDraftNote] = useState(entry.note ?? '')
+  const [noteError, setNoteError] = useState<string | null>(null)
 
   const poster = getPosterUrl(entry.posterPath)
   const detailPath =
@@ -28,8 +35,30 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
       ? ROUTES.MOVIE_DETAIL.replace(':movieId', String(entry.mediaId))
       : ROUTES.TV_SHOW.replace(':showId', String(entry.mediaId))
 
+  const nearLimit = draftNote.length >= WATCHLIST_NOTE_WARNING_AT
+
+  function handleCancelNote() {
+    setDraftNote(entry.note ?? '')
+    setNoteError(null)
+    setNoteExpanded(false)
+  }
+
   function handleSaveNote() {
-    watchlistStore.updateNote(entry.id, draftNote)
+    const result = WatchlistNoteInputSchema.safeParse(draftNote.trim())
+    if (!result.success) {
+      setNoteError(result.error.issues[0]?.message ?? 'Invalid note')
+      return
+    }
+
+    collectionStore.updateNote(entry.id, draftNote)
+    setNoteError(null)
+    setNoteExpanded(false)
+  }
+
+  function handleClearNote() {
+    collectionStore.clearNote(entry.id)
+    setDraftNote('')
+    setNoteError(null)
     setNoteExpanded(false)
   }
 
@@ -65,11 +94,16 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
                   ★ {entry.rating.toFixed(1)}
                 </p>
               )}
+              {entry.mediaType === 'tv' ? (
+                <div className="mt-2">
+                  <TvWatchlistProgress showId={entry.mediaId} />
+                </div>
+              ) : null}
             </div>
 
             <button
               type="button"
-              onClick={() => watchlistStore.remove(entry.id)}
+              onClick={() => collectionStore.remove(entry.id)}
               className="rounded-lg border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:border-red-500 hover:text-red-600 dark:border-gray-700 dark:text-gray-300 dark:hover:text-red-300"
             >
               Remove
@@ -81,7 +115,7 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
             <select
               value={entry.status}
               onChange={(event) =>
-                watchlistStore.updateStatus(entry.id, event.target.value as WatchlistStatus)
+                collectionStore.updateStatus(entry.id, event.target.value as WatchlistStatus)
               }
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 outline-none ring-purple-500 focus:ring-2 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
             >
@@ -98,6 +132,7 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
               type="button"
               onClick={() => {
                 setDraftNote(entry.note ?? '')
+                setNoteError(null)
                 setNoteExpanded((current) => !current)
               }}
               className="text-sm font-medium text-purple-600 hover:text-purple-500 dark:text-purple-400"
@@ -119,18 +154,45 @@ export const WatchlistItemCard = observer(function WatchlistItemCard({
                   placeholder="Add a personal note..."
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-purple-500 focus:ring-2 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                 />
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {draftNote.length}/{WATCHLIST_NOTE_MAX_LENGTH}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleSaveNote}
-                    className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-500"
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span
+                    className={[
+                      'text-xs',
+                      nearLimit ? 'font-medium text-amber-600 dark:text-amber-400' : 'text-gray-500',
+                    ].join(' ')}
                   >
-                    Save note
-                  </button>
+                    {draftNote.length}/{WATCHLIST_NOTE_MAX_LENGTH}
+                    {nearLimit ? ' · Approaching limit' : ''}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCancelNote}
+                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                    >
+                      Cancel
+                    </button>
+                    {entry.note ? (
+                      <button
+                        type="button"
+                        onClick={handleClearNote}
+                        className="rounded-lg border border-red-300 px-3 py-1.5 text-xs text-red-600 dark:border-red-800 dark:text-red-300"
+                      >
+                        Clear
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={handleSaveNote}
+                      className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-500"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
+                {noteError ? (
+                  <p className="text-xs text-red-600 dark:text-red-400">{noteError}</p>
+                ) : null}
               </div>
             ) : null}
           </div>

@@ -3,9 +3,10 @@ import { useEffect, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { authStore } from '@/Auth'
+import { collectionStore } from '@/Collection'
 import { NAV_ITEMS, ROUTES } from '@/Common'
 import { LanguageSelector } from '@/Preferences/ui/components/LanguageSelector'
-import { watchlistStore } from '@/Collection'
+
 function getInitials(username: string): string {
   return username.slice(0, 2).toUpperCase()
 }
@@ -42,7 +43,7 @@ export const Navbar = observer(function Navbar() {
 
   function handleLogout() {
     authStore.logout()
-    watchlistStore.clearSession()   // ← NEW line after 44
+    collectionStore.clearSession()
     navigate(ROUTES.LOGIN, { replace: true })
   }
 
@@ -90,9 +91,9 @@ export const Navbar = observer(function Navbar() {
             >
               <span className="inline-flex items-center gap-2">
                 {t(item.labelKey)}
-                {item.path === ROUTES.WATCHLIST && watchlistStore.totalCount > 0 && (
+                {item.path === ROUTES.WATCHLIST && collectionStore.totalCount > 0 && (
                   <span className="rounded-full bg-purple-600 px-2 py-0.5 text-xs font-semibold text-white">
-                    {watchlistStore.totalCount}
+                    {collectionStore.totalCount}
                   </span>
                 )}
               </span>

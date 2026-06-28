@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useParams } from 'react-router-dom'
 import {
@@ -8,19 +9,32 @@ import {
   TmdbApiError,
 } from '@/Common'
 import { ROUTES } from '@/Common/constants/Routes.constants'
-import type { TvDetail, TvShowOutletContext } from '@/TVShows/core/types/tv.schemas'
-import { getTvShowDetails } from '@/TVShows/data/services/tvShowService'
+import { collectionStore } from '@/Collection'
+import { getTotalEpisodeCount } from '@/Collection/core/utils/tvEpisodeUtils'
+import { AddToListPopover } from '@/Collection/ui/components/AddToListPopover'
+import { ProgressBadge } from '@/Collection/ui/components/ProgressBadge'
 import { WatchlistButton } from '@/Collection/ui/components/WatchlistButton'
+import type { SeasonDetail, TvDetail, TvShowOutletContext } from '@/TVShows/core/types/tv.schemas'
+import { getSeasonDetails, getTvShowDetails } from '@/TVShows/data/services/tvShowService'
+
+interface SeasonProgressMap {
+  [seasonNumber: number]: { watched: number; total: number }
+}
+
 interface TvShowLayoutFetcherProps {
   showId: number
   onRetry: () => void
 }
 
-function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
+const TvShowLayoutFetcher = observer(function TvShowLayoutFetcher({
+  showId,
+  onRetry,
+}: TvShowLayoutFetcherProps) {
   const [show, setShow] = useState<TvDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [seasonProgress, setSeasonProgress] = useState<SeasonProgressMap>({})
 
   useEffect(() => {
     let cancelled = false
@@ -48,6 +62,33 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
     }
   }, [showId])
 
+  useEffect(() => {
+    if (!show) return
+
+    const seasons = show.seasons.filter((season) => season.season_number > 0)
+    let cancelled = false
+
+    void Promise.all(
+      seasons.map((season) => getSeasonDetails(show.id, season.season_number)),
+    ).then((details: SeasonDetail[]) => {
+      if (cancelled) return
+
+      const next: SeasonProgressMap = {}
+      for (const seasonDetail of details) {
+        const episodeIds = seasonDetail.episodes.map((episode) => episode.id)
+        next[seasonDetail.season_number] = collectionStore.getSeasonProgress(
+          show.id,
+          episodeIds,
+        )
+      }
+      setSeasonProgress(next)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [show])
+
   if (loading) {
     return <LoadingSpinner label="Loading TV show..." />
   }
@@ -62,13 +103,13 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
   }
 
   if (error || !show) {
-    return (
-      <SectionError message={error ?? 'Failed to load'} onRetry={onRetry} />
-    )
+    return <SectionError message={error ?? 'Failed to load'} onRetry={onRetry} />
   }
 
   const backdrop = getBackdropUrl(show.backdrop_path)
   const seasons = show.seasons.filter((s) => s.season_number > 0)
+  const totalEpisodes = getTotalEpisodeCount(show.seasons)
+  const watchedCount = collectionStore.getWatchedEpisodeCount(show.id)
   const outletContext: TvShowOutletContext = { show }
 
   return (
@@ -80,17 +121,27 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
           <div className="h-56 bg-gray-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
-        <div className="absolute bottom-0 p-6">
+        <div className="absolute bottom-0 z-10 w-full p-6">
           <h1 className="text-3xl font-bold text-white">{show.name}</h1>
           <p className="mt-2 text-sm text-gray-300">
             {show.first_air_date?.slice(0, 4)} · ★ {show.vote_average.toFixed(1)} ·{' '}
             {show.number_of_seasons} seasons
           </p>
+          <div className="mt-2">
+            <ProgressBadge watched={watchedCount} total={totalEpisodes} />
+          </div>
           <p className="mt-1 text-sm text-purple-300">
             {show.genres.map((g) => g.name).join(', ')}
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <WatchlistButton
+              mediaId={show.id}
+              mediaType="tv"
+              title={show.name}
+              posterPath={show.poster_path}
+              rating={show.vote_average}
+            />
+            <AddToListPopover
               mediaId={show.id}
               mediaType="tv"
               title={show.name}
@@ -109,6 +160,7 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
           <nav className="space-y-2">
             {seasons.map((season) => {
               const seasonPath = `${ROUTES.TV_SHOW.replace(':showId', String(show.id))}/season/${season.season_number}`
+              const progress = seasonProgress[season.season_number]
 
               return (
                 <NavLink
@@ -125,7 +177,9 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
                 >
                   {season.name}
                   <span className="mt-0.5 block text-xs opacity-70">
-                    {season.episode_count} episodes
+                    {progress
+                      ? `${progress.watched}/${progress.total} watched`
+                      : `${season.episode_count} episodes`}
                   </span>
                 </NavLink>
               )
@@ -139,7 +193,7 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
       </div>
     </div>
   )
-}
+})
 
 export function TVShowLayoutPage() {
   const { showId } = useParams<{ showId: string }>()

@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { EmptyState } from '@/Common'
-import { watchlistStore } from '@/Collection'
-import { WATCHLIST_SORT_OPTIONS } from '@/Collection/core/constants/watchlist.constants'
-import type { WatchlistEntry, WatchlistStatus } from '@/Collection/core/types/watchlist.schemas'
+import { collectionStore } from '@/Collection'
+import { WATCHLIST_SORT_OPTIONS } from '@/Collection/core/constants/collection.constants'
+import type { WatchlistEntry, WatchlistStatus } from '@/Collection/core/types/collection.schemas'
 import { WatchlistItemCard } from '../components/WatchlistItemCard'
 
 type WatchlistFilter = 'all' | WatchlistStatus
@@ -17,10 +17,10 @@ const FILTER_TABS: { id: WatchlistFilter; label: string }[] = [
 ]
 
 function getFilterCount(filter: WatchlistFilter): number {
-  if (filter === 'all') return watchlistStore.totalCount
-  if (filter === 'want_to_watch') return watchlistStore.wantToWatchCount
-  if (filter === 'watching') return watchlistStore.watchingCount
-  return watchlistStore.completedCount
+  if (filter === 'all') return collectionStore.totalCount
+  if (filter === 'want_to_watch') return collectionStore.wantToWatchCount
+  if (filter === 'watching') return collectionStore.watchingCount
+  return collectionStore.completedCount
 }
 
 function sortEntries(entries: WatchlistEntry[], sort: WatchlistSort): WatchlistEntry[] {
@@ -48,10 +48,11 @@ export const WatchlistPage = observer(function WatchlistPage() {
   const [sortBy, setSortBy] = useState<WatchlistSort>('recently_added')
   const base =
     activeFilter === 'all'
-      ? watchlistStore.entries
-      : watchlistStore.entries.filter((entry) => entry.status === activeFilter)
+      ? collectionStore.entries
+      : collectionStore.entries.filter((entry) => entry.status === activeFilter)
 
   const filteredEntries = sortEntries(base, sortBy)
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-6 py-8">
       <div>

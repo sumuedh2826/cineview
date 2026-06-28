@@ -2,13 +2,12 @@ import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ROUTES } from '@/Common'
+import { collectionStore } from '@/Collection'
 import type { LoginFormErrors, LoginFormValues } from '../../core/types/auth.types'
 import { validateLoginForm } from '../../core/utils/validateLoginForm'
 import { authStore } from '../../data/stores/AuthStore'
 import { LoginForm } from '../components/LoginForm'
 import { SessionRestoringPlaceholder } from '../components/SessionRestoringPlaceholder'
-import { watchlistStore } from '@/Collection'
-
 
 export const LoginPage = observer(function LoginPage() {
   const navigate = useNavigate()
@@ -40,7 +39,8 @@ export const LoginPage = observer(function LoginPage() {
       setIsSubmitting(false)
       return
     }
-    watchlistStore.initialize()
+
+    collectionStore.initialize()
 
     const redirectTo =
       (location.state as { from?: { pathname?: string } } | null)?.from

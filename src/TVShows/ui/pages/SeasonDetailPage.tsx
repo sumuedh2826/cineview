@@ -1,6 +1,9 @@
+import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { EmptyState, getStillUrl, LoadingSpinner, SectionError } from '@/Common'
+import { collectionStore } from '@/Collection'
+import { ProgressBadge } from '@/Collection/ui/components/ProgressBadge'
 import type { Episode, SeasonDetail, TvShowOutletContext } from '@/TVShows/core/types/tv.schemas'
 import { getSeasonDetails } from '@/TVShows/data/services/tvShowService'
 
@@ -10,11 +13,14 @@ interface SeasonDetailFetcherProps {
   onRetry: () => void
 }
 
-function SeasonDetailFetcher({ showId, seasonNum, onRetry }: SeasonDetailFetcherProps) {
+const SeasonDetailFetcher = observer(function SeasonDetailFetcher({
+  showId,
+  seasonNum,
+  onRetry,
+}: SeasonDetailFetcherProps) {
   const [season, setSeason] = useState<SeasonDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [watchedEpisodes, setWatchedEpisodes] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     let cancelled = false
@@ -39,18 +45,6 @@ function SeasonDetailFetcher({ showId, seasonNum, onRetry }: SeasonDetailFetcher
     }
   }, [showId, seasonNum])
 
-  function toggleEpisode(episode: Episode) {
-    setWatchedEpisodes((current) => {
-      const next = new Set(current)
-      if (next.has(episode.id)) {
-        next.delete(episode.id)
-      } else {
-        next.add(episode.id)
-      }
-      return next
-    })
-  }
-
   if (loading) {
     return <LoadingSpinner label="Loading episodes..." />
   }
@@ -63,17 +57,52 @@ function SeasonDetailFetcher({ showId, seasonNum, onRetry }: SeasonDetailFetcher
     return <EmptyState title="No episodes" message="This season has no episodes yet." />
   }
 
+  const episodeIds = season.episodes.map((episode) => episode.id)
+  const seasonProgress = collectionStore.getSeasonProgress(showId, episodeIds)
+
+  function toggleEpisode(episode: Episode) {
+    collectionStore.toggleEpisode(showId, episode.id)
+  }
+
+  function handleMarkAll() {
+    collectionStore.markAllEpisodes(showId, episodeIds)
+  }
+
+  function handleUnmarkAll() {
+    collectionStore.unmarkAllEpisodes(showId, episodeIds)
+  }
+
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">{season.name}</h2>
-        <p className="text-sm text-gray-400">{season.episodes.length} episodes</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">{season.name}</h2>
+          <div className="mt-2">
+            <ProgressBadge watched={seasonProgress.watched} total={seasonProgress.total} />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleMarkAll}
+            className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:border-purple-500"
+          >
+            Mark All
+          </button>
+          <button
+            type="button"
+            onClick={handleUnmarkAll}
+            className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:border-purple-500"
+          >
+            Unmark All
+          </button>
+        </div>
       </div>
 
       <ul className="space-y-4">
         {season.episodes.map((episode) => {
           const still = getStillUrl(episode.still_path)
-          const isWatched = watchedEpisodes.has(episode.id)
+          const isWatched = collectionStore.isEpisodeWatched(showId, episode.id)
 
           return (
             <li
@@ -106,7 +135,6 @@ function SeasonDetailFetcher({ showId, seasonNum, onRetry }: SeasonDetailFetcher
                   checked={isWatched}
                   onChange={() => toggleEpisode(episode)}
                   aria-label={`Mark episode ${episode.episode_number} as watched`}
-                  title="Episode tracking coming soon"
                 />
                 Watched
               </label>
@@ -116,7 +144,7 @@ function SeasonDetailFetcher({ showId, seasonNum, onRetry }: SeasonDetailFetcher
       </ul>
     </section>
   )
-}
+})
 
 export function SeasonDetailPage() {
   const { show } = useOutletContext<TvShowOutletContext>()

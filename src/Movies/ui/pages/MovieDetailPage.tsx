@@ -10,6 +10,8 @@ import {
   TrailerModal,
   TmdbApiError,
 } from '@/Common'
+import { AddToListPopover } from '@/Collection/ui/components/AddToListPopover'
+import { WatchlistButton } from '@/Collection/ui/components/WatchlistButton'
 import type { MovieDetail } from '@/Movies/core/types/movie.schemas'
 import {
   getMovieCredits,
@@ -20,7 +22,7 @@ import {
 } from '@/Movies/data/services/movieService'
 import { CastCarousel } from '@/Movies/ui/components/CastCarousel'
 import { ContentRow } from '@/Movies/ui/components/ContentRow'
-import { WatchlistButton } from '@/Collection/ui/components/WatchlistButton'
+
 interface MovieDetailFetcherProps {
   movieId: number
   onRetry: () => void
@@ -83,9 +85,7 @@ function MovieDetailFetcher({ movieId, onRetry }: MovieDetailFetcherProps) {
   }
 
   if (error || !movie) {
-    return (
-      <SectionError message={error ?? 'Failed to load'} onRetry={onRetry} />
-    )
+    return <SectionError message={error ?? 'Failed to load'} onRetry={onRetry} />
   }
 
   const poster = getPosterUrl(movie.poster_path)
@@ -98,7 +98,7 @@ function MovieDetailFetcher({ movieId, onRetry }: MovieDetailFetcherProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
         <div className="relative flex gap-6 p-6">
           {poster && <img src={poster} alt={movie.title} className="w-40 rounded-xl" />}
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-3xl font-bold text-white">{movie.title}</h1>
             {movie.tagline && <p className="mt-1 italic text-gray-400">{movie.tagline}</p>}
             <p className="mt-2 text-sm text-gray-300">
@@ -109,7 +109,7 @@ function MovieDetailFetcher({ movieId, onRetry }: MovieDetailFetcherProps) {
               {movie.genres.map((genre) => genre.name).join(', ')}
             </p>
             <p className="mt-4 text-sm text-gray-300">{movie.overview}</p>
-            <div className="mt-4 flex gap-3">
+            <div className="relative z-10 mt-4 flex flex-wrap items-center gap-3">
               {trailerKey ? (
                 <button
                   type="button"
@@ -122,6 +122,13 @@ function MovieDetailFetcher({ movieId, onRetry }: MovieDetailFetcherProps) {
                 <p className="self-center text-sm text-gray-500">No trailer available</p>
               )}
               <WatchlistButton
+                mediaId={movie.id}
+                mediaType="movie"
+                title={movie.title}
+                posterPath={movie.poster_path}
+                rating={movie.vote_average}
+              />
+              <AddToListPopover
                 mediaId={movie.id}
                 mediaType="movie"
                 title={movie.title}
