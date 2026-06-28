@@ -10,7 +10,7 @@ import {
 import { ROUTES } from '@/Common/constants/Routes.constants'
 import type { TvDetail, TvShowOutletContext } from '@/TVShows/core/types/tv.schemas'
 import { getTvShowDetails } from '@/TVShows/data/services/tvShowService'
-
+import { WatchlistButton } from '@/Collection/ui/components/WatchlistButton'
 interface TvShowLayoutFetcherProps {
   showId: number
   onRetry: () => void
@@ -89,6 +89,15 @@ function TvShowLayoutFetcher({ showId, onRetry }: TvShowLayoutFetcherProps) {
           <p className="mt-1 text-sm text-purple-300">
             {show.genres.map((g) => g.name).join(', ')}
           </p>
+          <div className="mt-4">
+            <WatchlistButton
+              mediaId={show.id}
+              mediaType="tv"
+              title={show.name}
+              posterPath={show.poster_path}
+              rating={show.vote_average}
+            />
+          </div>
         </div>
       </section>
 

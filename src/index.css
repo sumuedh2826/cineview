@@ -13,10 +13,15 @@
     margin: 0;
     min-height: 100vh;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    background-color: #0a0a0f;
-    color: #f3f4f6;
+    background-color: #f8fafc;
+    color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark body {
+    background-color: #0a0a0f;
+    color: #f3f4f6;
   }
 
   #root {

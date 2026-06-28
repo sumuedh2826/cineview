@@ -3,6 +3,7 @@ import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom'
 import { authStore } from '@/Auth'
 import { AUTH_STORAGE_KEY } from '@/Auth/core/constants/Auth.constants'
 import { bootstrapApplication } from '@/bootstrap'
+import { watchlistStore } from '@/Collection'
 import { preferencesStore } from '@/Preferences'
 
 interface RenderWithProvidersOptions extends RenderOptions {
@@ -22,6 +23,7 @@ export function renderWithProviders(
 ) {
   authStore.resetForTests()
   preferencesStore.resetForTests()
+  watchlistStore.resetForTests()
   localStorage.clear()
 
   if (authenticated) {

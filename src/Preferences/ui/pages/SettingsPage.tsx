@@ -6,13 +6,14 @@ import { ROUTES } from '@/Common'
 import { LanguageSelector } from '../components/LanguageSelector'
 import { RegionSelector } from '../components/RegionSelector'
 import { ThemeSelector } from '../components/ThemeSelector'
-
+import { watchlistStore } from '@/Collection'
 export const SettingsPage = observer(function SettingsPage() {
   const { t } = useTranslation('preferences')
   const navigate = useNavigate()
 
   function handleLogout() {
     authStore.logout()
+    watchlistStore.clearSession()   // ← NEW after line 15
     navigate(ROUTES.LOGIN, { replace: true })
   }
 

@@ -7,6 +7,8 @@ import { validateLoginForm } from '../../core/utils/validateLoginForm'
 import { authStore } from '../../data/stores/AuthStore'
 import { LoginForm } from '../components/LoginForm'
 import { SessionRestoringPlaceholder } from '../components/SessionRestoringPlaceholder'
+import { watchlistStore } from '@/Collection'
+
 
 export const LoginPage = observer(function LoginPage() {
   const navigate = useNavigate()
@@ -38,6 +40,7 @@ export const LoginPage = observer(function LoginPage() {
       setIsSubmitting(false)
       return
     }
+    watchlistStore.initialize()
 
     const redirectTo =
       (location.state as { from?: { pathname?: string } } | null)?.from

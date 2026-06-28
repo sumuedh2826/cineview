@@ -5,7 +5,7 @@ import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router
 import { authStore } from '@/Auth'
 import { NAV_ITEMS, ROUTES } from '@/Common'
 import { LanguageSelector } from '@/Preferences/ui/components/LanguageSelector'
-
+import { watchlistStore } from '@/Collection'
 function getInitials(username: string): string {
   return username.slice(0, 2).toUpperCase()
 }
@@ -42,6 +42,7 @@ export const Navbar = observer(function Navbar() {
 
   function handleLogout() {
     authStore.logout()
+    watchlistStore.clearSession()   // ← NEW line after 44
     navigate(ROUTES.LOGIN, { replace: true })
   }
 
@@ -87,7 +88,14 @@ export const Navbar = observer(function Navbar() {
                 ].join(' ')
               }
             >
-              {t(item.labelKey)}
+              <span className="inline-flex items-center gap-2">
+                {t(item.labelKey)}
+                {item.path === ROUTES.WATCHLIST && watchlistStore.totalCount > 0 && (
+                  <span className="rounded-full bg-purple-600 px-2 py-0.5 text-xs font-semibold text-white">
+                    {watchlistStore.totalCount}
+                  </span>
+                )}
+              </span>
             </NavLink>
           ))}
         </nav>

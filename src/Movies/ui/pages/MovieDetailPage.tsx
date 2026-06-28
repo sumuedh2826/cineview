@@ -20,7 +20,7 @@ import {
 } from '@/Movies/data/services/movieService'
 import { CastCarousel } from '@/Movies/ui/components/CastCarousel'
 import { ContentRow } from '@/Movies/ui/components/ContentRow'
-
+import { WatchlistButton } from '@/Collection/ui/components/WatchlistButton'
 interface MovieDetailFetcherProps {
   movieId: number
   onRetry: () => void
@@ -121,14 +121,13 @@ function MovieDetailFetcher({ movieId, onRetry }: MovieDetailFetcherProps) {
               ) : (
                 <p className="self-center text-sm text-gray-500">No trailer available</p>
               )}
-              <button
-                type="button"
-                disabled
-                title="Watchlist coming soon"
-                className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-white"
-              >
-                + Watchlist
-              </button>
+              <WatchlistButton
+                mediaId={movie.id}
+                mediaType="movie"
+                title={movie.title}
+                posterPath={movie.poster_path}
+                rating={movie.vote_average}
+              />
             </div>
           </div>
         </div>

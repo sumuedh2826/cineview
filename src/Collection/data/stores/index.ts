@@ -1,0 +1,1 @@
+export { WatchlistStore, watchlistStore } from './WatchlistStore'
