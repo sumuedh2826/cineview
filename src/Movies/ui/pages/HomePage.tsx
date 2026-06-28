@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AsyncSection, LoadingSpinner, SectionError } from '@/Common'
 import type { MovieSummary } from '@/Movies/core/types/movie.schemas'
 import {
@@ -17,6 +18,7 @@ interface HomeHeroProps {
 }
 
 function HomeHero({ onRetry }: HomeHeroProps) {
+  const { t } = useTranslation('movies')
   const [hero, setHero] = useState<MovieSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +35,7 @@ function HomeHero({ onRetry }: HomeHeroProps) {
       })
       .catch((e) => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Failed to load hero')
+          setError(e instanceof Error ? e.message : t('home.heroLoadFailed'))
           setLoading(false)
         }
       })
@@ -41,10 +43,10 @@ function HomeHero({ onRetry }: HomeHeroProps) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [t])
 
   if (loading) {
-    return <LoadingSpinner label="Loading featured title..." />
+    return <LoadingSpinner label={t('home.heroLoading')} />
   }
 
   if (error) {
@@ -59,6 +61,7 @@ function HomeHero({ onRetry }: HomeHeroProps) {
 }
 
 export function HomePage() {
+  const { t } = useTranslation('movies')
   const [genreId, setGenreId] = useState<number | null>(null)
   const [heroRetryToken, setHeroRetryToken] = useState(0)
 
@@ -73,19 +76,39 @@ export function HomePage() {
 
       {genreId === null ? (
         <>
-          <AsyncSection title="Trending Today" load={getTrendingMovies} isEmpty={(d) => !d.results.length} render={(d) => <ContentRow movies={d.results} />} />
-          <AsyncSection title="Popular Movies" load={getPopularMovies} isEmpty={(d) => !d.results.length} render={(d) => <ContentRow movies={d.results} />} />
-          <AsyncSection title="Top Rated" load={getTopRatedMovies} isEmpty={(d) => !d.results.length} render={(d) => <ContentRow movies={d.results} />} />
-          <AsyncSection title="Upcoming" load={getUpcomingMovies} isEmpty={(d) => !d.results.length} render={(d) => <ContentRow movies={d.results} />} />
+          <AsyncSection
+            title={t('home.trendingToday')}
+            load={getTrendingMovies}
+            isEmpty={(data) => !data.results.length}
+            render={(data) => <ContentRow movies={data.results} />}
+          />
+          <AsyncSection
+            title={t('home.popularMovies')}
+            load={getPopularMovies}
+            isEmpty={(data) => !data.results.length}
+            render={(data) => <ContentRow movies={data.results} />}
+          />
+          <AsyncSection
+            title={t('home.topRated')}
+            load={getTopRatedMovies}
+            isEmpty={(data) => !data.results.length}
+            render={(data) => <ContentRow movies={data.results} />}
+          />
+          <AsyncSection
+            title={t('home.upcoming')}
+            load={getUpcomingMovies}
+            isEmpty={(data) => !data.results.length}
+            render={(data) => <ContentRow movies={data.results} />}
+          />
         </>
       ) : (
         <AsyncSection
-          title="Filtered Results"
+          title={t('home.filteredResults')}
           cacheKey={genreId}
           load={() => discoverMoviesByGenre(genreId)}
-          isEmpty={(d) => !d.results.length}
-          emptyTitle="No movies found"
-          render={(d) => <ContentRow movies={d.results} />}
+          isEmpty={(data) => !data.results.length}
+          emptyTitle={t('home.noMoviesFound')}
+          render={(data) => <ContentRow movies={data.results} />}
         />
       )}
     </div>

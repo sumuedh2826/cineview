@@ -1,0 +1,22 @@
+{
+  "appName": "CineView",
+  "nav": {
+    "home": "Inicio",
+    "watchlist": "Mi lista",
+    "lists": "Listas",
+    "settings": "Ajustes"
+  },
+  "actions": {
+    "logout": "Cerrar sesión"
+  },
+  "language": {
+    "en": "EN",
+    "es": "ES",
+    "switch": "Cambiar idioma"
+  },
+  "search": {
+    "placeholder": "Buscar películas, series...",
+    "ariaLabel": "Buscar películas y series"
+  },
+  "user": "Usuario"
+}

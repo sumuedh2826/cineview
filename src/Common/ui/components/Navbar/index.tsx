@@ -1,14 +1,17 @@
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { authStore } from '@/Auth'
 import { NAV_ITEMS, ROUTES } from '@/Common'
+import { LanguageSelector } from '@/Preferences/ui/components/LanguageSelector'
 
 function getInitials(username: string): string {
   return username.slice(0, 2).toUpperCase()
 }
 
 export const Navbar = observer(function Navbar() {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -66,7 +69,7 @@ export const Navbar = observer(function Navbar() {
           to={ROUTES.HOME}
           className="text-xl font-bold text-white hover:text-purple-300"
         >
-          CineView
+          {t('appName')}
         </NavLink>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -84,7 +87,7 @@ export const Navbar = observer(function Navbar() {
                 ].join(' ')
               }
             >
-              {item.label}
+              {t(item.labelKey)}
             </NavLink>
           ))}
         </nav>
@@ -95,24 +98,17 @@ export const Navbar = observer(function Navbar() {
             value={searchValue}
             onChange={(event) => handleSearchChange(event.target.value)}
             onKeyDown={handleSearchKeyDown}
-            placeholder="Search movies, shows..."
-            aria-label="Search movies and shows"
+            placeholder={t('search.placeholder')}
+            aria-label={t('search.ariaLabel')}
             className="hidden w-56 rounded-full border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-300 placeholder:text-gray-500 md:block"
           />
 
-          <button
-            type="button"
-            disabled
-            aria-label="Language switcher"
-            className="rounded-full border border-gray-700 px-3 py-1 text-xs text-gray-400"
-          >
-            EN
-          </button>
+          <LanguageSelector variant="compact" />
 
           <div
             className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-sm font-semibold text-white"
-            aria-label="User avatar"
-            title={authStore.session?.username ?? 'User'}
+            aria-label={t('user')}
+            title={authStore.session?.username ?? t('user')}
           >
             {authStore.session ? getInitials(authStore.session.username) : 'U'}
           </div>
@@ -122,7 +118,7 @@ export const Navbar = observer(function Navbar() {
             onClick={handleLogout}
             className="text-sm font-medium text-gray-300 hover:text-white"
           >
-            Logout
+            {t('actions.logout')}
           </button>
         </div>
       </div>

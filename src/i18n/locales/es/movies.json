@@ -1,0 +1,28 @@
+{
+  "home": {
+    "heroLoading": "Cargando título destacado...",
+    "heroLoadFailed": "Error al cargar el héroe",
+    "trendingToday": "Tendencias de hoy",
+    "popularMovies": "Películas populares",
+    "topRated": "Mejor valoradas",
+    "upcoming": "Próximos estrenos",
+    "filteredResults": "Resultados filtrados",
+    "noMoviesFound": "No se encontraron películas",
+    "nothingToShow": "Nada que mostrar"
+  },
+  "genres": {
+    "all": "Todo",
+    "action": "Acción",
+    "sciFi": "Ciencia ficción",
+    "drama": "Drama",
+    "comedy": "Comedia",
+    "horror": "Terror",
+    "animation": "Animación",
+    "thriller": "Suspense",
+    "documentary": "Documental"
+  },
+  "hero": {
+    "viewDetails": "Ver detalles",
+    "rating": "Puntuación {{value}}"
+  }
+}

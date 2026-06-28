@@ -1,0 +1,28 @@
+{
+  "home": {
+    "heroLoading": "Loading featured title...",
+    "heroLoadFailed": "Failed to load hero",
+    "trendingToday": "Trending Today",
+    "popularMovies": "Popular Movies",
+    "topRated": "Top Rated",
+    "upcoming": "Upcoming",
+    "filteredResults": "Filtered Results",
+    "noMoviesFound": "No movies found",
+    "nothingToShow": "Nothing to show"
+  },
+  "genres": {
+    "all": "All Discover",
+    "action": "Action",
+    "sciFi": "Sci-Fi",
+    "drama": "Drama",
+    "comedy": "Comedy",
+    "horror": "Horror",
+    "animation": "Animation",
+    "thriller": "Thriller",
+    "documentary": "Documentary"
+  },
+  "hero": {
+    "viewDetails": "View Details",
+    "rating": "Rating {{value}}"
+  }
+}

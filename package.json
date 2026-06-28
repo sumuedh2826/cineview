@@ -12,10 +12,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "i18next": "^26.3.2",
     "mobx": "^6.15.0",
     "mobx-react-lite": "^4.1.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^7.13.1",
     "styled-components": "^6.3.11",
     "zod": "^4.3.6"

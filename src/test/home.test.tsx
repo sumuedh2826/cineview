@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { bootstrapApplication } from '@/bootstrap'
+import { preferencesStore } from '@/Preferences'
 import { HomePage } from '@/Movies/ui/pages/HomePage'
 
 vi.mock('@/Movies/data/services/movieService', () => ({
@@ -28,9 +30,11 @@ vi.mock('@/Movies/data/services/movieService', () => ({
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    preferencesStore.resetForTests()
+    bootstrapApplication()
   })
 
-  it('renders hero and trending section', async () => {
+  it('renders hero and trending section in English', async () => {
     render(
       <MemoryRouter>
         <HomePage />
@@ -45,6 +49,20 @@ describe('HomePage', () => {
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Test Movie' }),
+    ).toBeInTheDocument()
+  })
+
+  it('renders translated home labels in Spanish', async () => {
+    preferencesStore.setLanguage('es')
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    )
+
+    expect(
+      await screen.findByRole('heading', { name: 'Tendencias de hoy' }),
     ).toBeInTheDocument()
   })
 })

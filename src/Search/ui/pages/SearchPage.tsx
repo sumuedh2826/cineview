@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { EmptyState, LoadingSpinner, SectionError, useDebouncedValue } from '@/Common'
 import { SEARCH_DEBOUNCE_MS } from '@/Search/core/constants/search.constants'
@@ -47,9 +47,9 @@ function SearchResults({ query, onComplete }: SearchResultsProps) {
     }
   }, [query, onComplete])
 
-  const movies = results.filter((r) => r.media_type === 'movie')
-  const tvShows = results.filter((r) => r.media_type === 'tv')
-  const people = results.filter((r) => r.media_type === 'person')
+  const movies = results.filter((result) => result.media_type === 'movie')
+  const tvShows = results.filter((result) => result.media_type === 'tv')
+  const people = results.filter((result) => result.media_type === 'person')
 
   if (loading) {
     return <LoadingSpinner label="Searching..." />
@@ -103,50 +103,31 @@ function SearchResults({ query, onComplete }: SearchResultsProps) {
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const query = searchParams.get('q') ?? ''
+  const urlQuery = searchParams.get('q') ?? ''
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches)
-  const lastHistoryQueryRef = useRef(query.trim() || null)
-  const skipHistoryEffectRef = useRef(true)
 
-  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
-  const activeQuery = debouncedQuery.trim()
+  const debouncedQuery = useDebouncedValue(urlQuery, SEARCH_DEBOUNCE_MS)
+  const activeQuery = urlQuery.trim() === '' ? '' : debouncedQuery.trim()
 
-  const updateQuery = useCallback(
+  const handleInputChange = useCallback(
     (value: string) => {
-      if (value) {
+      if (value.trim()) {
         setSearchParams({ q: value }, { replace: true })
-      } else {
-        setSearchParams({}, { replace: true })
-        lastHistoryQueryRef.current = null
+        return
       }
+
+      setSearchParams({}, { replace: true })
     },
     [setSearchParams],
   )
 
-  useEffect(() => {
-    if (skipHistoryEffectRef.current) {
-      skipHistoryEffectRef.current = false
-      lastHistoryQueryRef.current = debouncedQuery.trim() || null
-      return
-    }
-
-    const trimmed = debouncedQuery.trim()
-    if (!trimmed || lastHistoryQueryRef.current === trimmed) {
-      return
-    }
-
-    lastHistoryQueryRef.current = trimmed
-    setSearchParams({ q: debouncedQuery }, { replace: false })
-  }, [debouncedQuery, setSearchParams])
-
   const handleSearchComplete = useCallback((completedQuery: string) => {
     setRecentSearches(addRecentSearch(completedQuery))
-  }, [setRecentSearches])
+  }, [])
 
   const handleRecentSelect = useCallback(
     (selectedQuery: string) => {
-      lastHistoryQueryRef.current = selectedQuery.trim()
-      setSearchParams({ q: selectedQuery }, { replace: false })
+      setSearchParams({ q: selectedQuery }, { replace: true })
     },
     [setSearchParams],
   )
@@ -162,8 +143,8 @@ export function SearchPage() {
 
       <input
         type="search"
-        value={query}
-        onChange={(event) => updateQuery(event.target.value)}
+        value={urlQuery}
+        onChange={(event) => handleInputChange(event.target.value)}
         placeholder="Search movies, TV shows, people..."
         aria-label="Search"
         className="w-full rounded-xl border border-gray-700 bg-gray-900 px-4 py-3 text-white outline-none ring-purple-500 focus:ring-2"

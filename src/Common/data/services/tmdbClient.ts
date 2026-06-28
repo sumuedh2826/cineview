@@ -1,4 +1,5 @@
 import type { ZodType } from 'zod'
+import { preferencesStore } from '@/Preferences'
 
 export class TmdbApiError extends Error {
   readonly status?: number
@@ -22,8 +23,11 @@ export async function tmdbRequest<T>(
 
   const url = new URL(`${baseUrl}${path.startsWith('/') ? path : `/${path}`}`)
   url.searchParams.set('api_key', apiKey)
-  for (const [k, v] of Object.entries(options.params ?? {})) {
-    if (v !== undefined) url.searchParams.set(k, String(v))
+  url.searchParams.set('language', preferencesStore.tmdbLanguage)
+  url.searchParams.set('region', preferencesStore.region)
+
+  for (const [key, value] of Object.entries(options.params ?? {})) {
+    if (value !== undefined) url.searchParams.set(key, String(value))
   }
 
   const res = await fetch(url.toString())

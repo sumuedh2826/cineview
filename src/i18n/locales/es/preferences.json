@@ -1,0 +1,21 @@
+{
+    "title": "Ajustes",
+    "subtitle": "Personaliza tu experiencia en CineView.",
+    "theme": {
+      "label": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "language": {
+      "label": "Idioma",
+      "en": "Inglés",
+      "es": "Español"
+    },
+    "region": {
+      "label": "Región",
+      "US": "Estados Unidos",
+      "GB": "Reino Unido",
+      "ES": "España"
+    },
+    "logout": "Cerrar sesión"
+  }

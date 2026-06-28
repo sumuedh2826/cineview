@@ -2,6 +2,8 @@ import { render, type RenderOptions } from '@testing-library/react'
 import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom'
 import { authStore } from '@/Auth'
 import { AUTH_STORAGE_KEY } from '@/Auth/core/constants/Auth.constants'
+import { bootstrapApplication } from '@/bootstrap'
+import { preferencesStore } from '@/Preferences'
 
 interface RenderWithProvidersOptions extends RenderOptions {
   route?: string
@@ -19,6 +21,7 @@ export function renderWithProviders(
   }: RenderWithProvidersOptions = {},
 ) {
   authStore.resetForTests()
+  preferencesStore.resetForTests()
   localStorage.clear()
 
   if (authenticated) {
@@ -28,7 +31,7 @@ export function renderWithProviders(
     )
   }
 
-  authStore.restoreSession()
+  bootstrapApplication()
 
   return render(
     <MemoryRouter initialEntries={[route]} {...routerProps}>

@@ -3,6 +3,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { authStore } from '@/Auth'
 import { AUTH_STORAGE_KEY } from '@/Auth/core/constants/Auth.constants'
+import { bootstrapApplication } from '@/bootstrap'
+import { preferencesStore } from '@/Preferences'
 import App from '@/App'
 import { AppRoutes } from '@/router'
 
@@ -22,8 +24,10 @@ vi.mock('@/Movies/data/services/movieService', () => ({
 describe('Milestone 1 smoke tests', () => {
   beforeEach(() => {
     authStore.resetForTests()
+    preferencesStore.resetForTests()
     localStorage.clear()
     vi.clearAllMocks()
+    bootstrapApplication()
   })
 
   it('App renders without crashing', () => {
@@ -40,6 +44,7 @@ describe('Milestone 1 smoke tests', () => {
       AUTH_STORAGE_KEY,
       JSON.stringify({ username: 'admin' }),
     )
+    bootstrapApplication()
 
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -53,8 +58,6 @@ describe('Milestone 1 smoke tests', () => {
   })
 
   it('404 route renders NotFoundPage', () => {
-    authStore.restoreSession()
-
     render(
       <MemoryRouter initialEntries={['/invalid-path']}>
         <AppRoutes />
